@@ -160,6 +160,18 @@ class VoiceModelParser:
         # TODO: If links not found, search in author comments
         # sometimes they forgot and add the link later in a comment
         return links
+    
+    @staticmethod
+    def extract_links(text:str) -> List[str]:
+        """Attempt to extract links from a string (currently only google drive and mega)"""
+        if 'drive.google.com/' in text:
+            pattern = r'https://drive.google.com/file/d/.{33}/view\?usp=sharing'
+        elif 'mega.nz/' in text:
+            pattern= r'https://mega.nz/file/.{52}'
+        else:
+            return list()  # returns an empty list if google drive or mega link not found
+        found_links = re.findall(pattern, text)
+        return found_links
 
     @property
     def message(self) -> str:
