@@ -72,13 +72,13 @@ class VoiceModelParser:
     @staticmethod
     def extract_epochs(text:str) -> int:
         """Attempts to extract epochs from a string, returns -1 on failure"""
-        pattern = r'\d*\.?\d+[K-k]? [E-e]poch[s]?'
+        pattern = r'\s\d+\.?\d*[k]? epoch[s]?'
         text = text.lower()
         matches = re.findall(pattern, text)
         if not matches:
             # cound't find the epochs
             return -1
-        result = matches[0]
+        result = matches[0].strip()
         epoch, _ = result.split(' ')
         if 'k' in epoch.lower():
             epoch = epoch.lower().replace('k', '')
@@ -96,7 +96,7 @@ class VoiceModelParser:
     @staticmethod
     def extract_steps(text:str) -> int:
         """Attempts to extract steps from a string, returns -1 on failure"""
-        pattern = r'\s\d+[k]? step[s]?'
+        pattern = r'\s\d+\.?\d*[k]? step[s]?'
         text = text.lower()
         matches = re.findall(pattern, text)
         if not matches:
