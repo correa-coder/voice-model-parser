@@ -27,7 +27,10 @@ def main():
     html_dir = BASE_DIR / 'pages'  # look for .html files in this directory
     html_files = [f for f in html_dir.iterdir() if (f.is_file() and f.suffix == '.html')]
     total_files = len(html_files)
-    data_to_export = {'voice_models': []}  # this will be saved as data.json
+    previous_data = {}
+    with open(BASE_DIR / 'data.json', 'r', encoding='utf8') as json_f:
+        previous_data = json.load(json_f)
+    new_data = {'voice_models': [{'test': 123}]}  # this will be saved to data.json
 
     # fp = File path
     for fp in html_files:
@@ -41,7 +44,7 @@ def main():
             parser.view_data()
             if parser.links:
                 # only add to json if found download links
-                data_to_export['voice_models'].append(parser.to_dict())
+                new_data['voice_models'].append(parser.to_dict())
                 # move to archived folder if everything went well
                 try:
                     shutil.move(str(fp), str(BASE_DIR / 'pages' / 'archived'))
@@ -62,8 +65,10 @@ def main():
         print('-' * 128)
         print()
 
-    with open(BASE_DIR / 'data.json', 'a', encoding='utf8') as json_f:
-        json.dump(data_to_export, json_f, indent=4)
+    with open(BASE_DIR / 'data.json', 'w', encoding='utf8') as json_f:
+        # merge the new data with previous one
+        previous_data['voice_models'] +=  new_data['voice_models']
+        json.dump(previous_data, json_f, indent=4)
 
     message = f'{total_files} file(s) analyzed. See "{log_file_path.name}" for more details.\n\n'
     print(message)
