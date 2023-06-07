@@ -205,6 +205,9 @@ class VoiceModelParser:
             result['info'] = 'No additional info'
         else:
             result['info'] = f'{self.epochs} Epochs'
+            # add steps if present
+            if self.steps != -1:
+                result['info'] += f' {self.steps} Steps'
         result['release_date'] = self.release_date.strftime('%Y-%m-%d')
         if self.links:
             result['download_link'] = self.links[0]
