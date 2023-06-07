@@ -4,27 +4,6 @@ from typing import List
 
 from bs4 import BeautifulSoup
 
-'''
-Post title rules by QuickWick
------------------------------
-
-`Britney Spears 100k` - For SVC, there will be no tag
-`Jhay Cortez (RVC) 250 Epoch` - For RVC
-`Gummibär (RVC v2) 300 Epoch` - For RVC v2
-`Jeno (From NCT) (RVC) 350 Epoch 11k Steps` - This is RVC with a band name
-
-If Artists is in a band or from game or animeshow, Do the following:
-
-ArtistName `(From Bandname)` (RVC) 250 Epoch
-ArtistName `(From AnimeShowName)` (RVC) 500 Epoch
-ArtistName `(From GameName)` (RVC) 2.7k Epoch
-
-Note: SVC should only include Steps. RVC Should include Epochs to easily differentiate - RVC can include both Epoch & Steps, if you so wish such as example #4.
-
-If an Epoch or Steps surpasses 999, it should be named the following for title compression:
-`ASAP Rocky (RVC) 1k Epoch`
-`Maeve (From Paladins) 1.6k Epoch`
-'''
 
 class VoiceModel:
     ...
@@ -48,8 +27,40 @@ class VoiceModelParser:
     @property
     def name(self) -> str:
         """Returns the voice model name extracted from the title"""
-        info_start_index = self.title.lower().find('rvc')
-        return self.title[:info_start_index-1].strip()
+        is_rvc_model:bool = self.category.startswith('RVC')
+        return self.extract_name(self.title, is_rvc_model)
+    
+    @staticmethod
+    def extract_name(text:str, is_rvc:bool=True) -> str:
+        """Removes epochs and steps info from a string"""
+        result = ''
+        if is_rvc:
+            # try to find (RVC) or RVC in the title and remove it and everything after
+            if '(rvc' in text.lower():
+                # Artist (RVC) 300 epochs -> Artist
+                # Artist (From Band) (RVC v2) 300 epochs -> Artist (From Band)
+                extra_info_index = text.lower().find('(rvc')
+                result = text[:extra_info_index].strip()
+            elif 'rvc' in text.lower():
+                # Artist RVC 300 epochs -> Artist
+                extra_info_index = text.lower().find('rvc')
+                result = text[:extra_info_index].strip()
+            else:
+                # on failure returns the original string
+                result = text
+        else:
+            # SVC models
+            # Try to find the number of steps and remove it and everything after
+            # Artist 100k -> Artist
+            pattern = r'\s\d+[k]?'
+            matches = re.findall(pattern, text)
+            # if nothing found returns the original string
+            if not matches:
+                result = text
+            else:
+                extra_info_index = text.find(matches[0])
+                result = text[:extra_info_index]
+        return result
 
     @property
     def tags(self) -> List[str]:

@@ -22,6 +22,14 @@ class ParserTests(unittest.TestCase):
         self.assertEqual(VoiceModelParser.extract_steps('ModelName (RVC v2) 44k steps'), 44000)
         self.assertEqual(VoiceModelParser.extract_steps('ModelName (RVC v2) 44k STEP'), 44000)
         self.assertEqual(VoiceModelParser.extract_steps('ModelName (RVC v2) (44.12k STEPS)'), 44120)
+
+    def test_extract_name(self):
+        self.assertEqual(VoiceModelParser.extract_name('Jhay Cortez (RVC) 250 Epoch'), 'Jhay Cortez')
+        self.assertEqual(VoiceModelParser.extract_name('Gummibär (RVC v2) 300 Epoch'), 'Gummibär')
+        self.assertEqual(VoiceModelParser.extract_name('Jeno (From NCT) (RVC) 350 Epoch 11k Steps'), 'Jeno (From NCT)')
+        self.assertEqual(VoiceModelParser.extract_name('Maeve (From Paladins) RVC 1.6k Epoch'), 'Maeve (From Paladins)')
+        self.assertEqual(VoiceModelParser.extract_name('Britney Spears 100k', is_rvc=False), 'Britney Spears')
+        self.assertEqual(VoiceModelParser.extract_name('Britney Spears', is_rvc=False), 'Britney Spears')
         
 
 if __name__ == '__main__':
