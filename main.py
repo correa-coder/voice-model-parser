@@ -10,7 +10,7 @@ from pathlib import Path
 
 from bs4 import BeautifulSoup
 
-from parsers import VoiceModelParser
+from utils.parsers import VoiceModelParser
 
 BASE_DIR = Path(__file__).parent
 

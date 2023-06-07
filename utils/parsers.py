@@ -68,19 +68,29 @@ class VoiceModelParser:
             if 'RVC V2' in tag:
               result += ' v2'
         return result
+    
+    @staticmethod
+    def extract_epochs(text:str) -> int:
+        """Attempts to extract epochs from a string, returns -1 on failure"""
+        pattern = r'\d*\.?\d+[K-k]? [E-e]poch[s]?'
+        text = text.lower()
+        matches = re.findall(pattern, text)
+        if not matches:
+            # cound't find the epochs
+            return -1
+        result = matches[0]
+        epoch, _ = result.split(' ')
+        if 'k' in epoch.lower():
+            epoch = epoch.lower().replace('k', '')
+            epoch = float(epoch) * 1000
+        result = int(epoch)
+        return result
 
     @property
     def epochs(self) -> int:
         result = -1
         if self.category.startswith('RVC'):
-          pattern = r'\d*\.?\d+[K-k]? [E-e]poch[s]?'
-          matches = re.findall(pattern, self.title)
-          result = matches[0]
-          epoch, _ = result.split(' ')
-          if 'k' in epoch.lower():
-            epoch = epoch.lower().replace('k', '')
-            epoch = float(epoch) * 1000
-          result = int(epoch)
+          result = self.extract_epochs(self.title)
         return result
 
     @property
