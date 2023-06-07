@@ -112,7 +112,7 @@ class VoiceModelParser:
 
     @property
     def steps(self) -> int:
-        self.extract_steps(self.title)
+        return self.extract_steps(self.title)
 
     @property
     def author(self) -> str:
