@@ -16,7 +16,12 @@ class ParserTests(unittest.TestCase):
         self.assertEqual(VoiceModelParser.extract_epochs('ModelName (RVC v2) 2k EPOCH'), 2000)
         self.assertEqual(VoiceModelParser.extract_epochs('ModelName (RVC v2) 2k EPOCHS'), 2000)
 
-
+    def test_extract_steps(self):
+        self.assertEqual(VoiceModelParser.extract_steps('ModelName (RVC v2) 800 epochs'), -1)
+        self.assertEqual(VoiceModelParser.extract_steps('ModelName (RVC v2) 100 step'), 100)
+        self.assertEqual(VoiceModelParser.extract_steps('ModelName (RVC v2) 44k steps'), 44000)
+        self.assertEqual(VoiceModelParser.extract_steps('ModelName (RVC v2) 44k STEPS'), 44000)
+        
 
 if __name__ == '__main__':
     unittest.main()

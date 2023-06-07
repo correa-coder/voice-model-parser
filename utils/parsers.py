@@ -92,10 +92,27 @@ class VoiceModelParser:
         if self.category.startswith('RVC'):
           result = self.extract_epochs(self.title)
         return result
+    
+    @staticmethod
+    def extract_steps(text:str) -> int:
+        """Attempts to extract steps from a string, returns -1 on failure"""
+        pattern = r'\s\d+[k]? step[s]?'
+        text = text.lower()
+        matches = re.findall(pattern, text)
+        if not matches:
+            # cound't find the epochs
+            return -1
+        result = matches[0].strip()
+        steps, _ = result.split(' ')
+        if 'k' in steps.lower():
+            steps = steps.lower().replace('k', '')
+            steps = float(steps) * 1000
+        result = int(steps)
+        return result
 
     @property
     def steps(self) -> int:
-        return -1
+        self.extract_steps(self.title)
 
     @property
     def author(self) -> str:
