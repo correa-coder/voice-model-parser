@@ -4,6 +4,7 @@ from typing import List
 from bs4 import BeautifulSoup
 
 from .forum import DiscordForumParser
+from ..utils.converters import NumberConverter
 
 
 class VoiceModel:
@@ -58,9 +59,9 @@ class VoiceModel:
         result += f' ({self.type})'
 
         if self.epochs != -1:
-            result += f' {self.epochs} Epochs'
+            result += f' {NumberConverter.to_string(self.epochs)} Epochs'
         if self.steps != -1:
-            result += f' {self.steps} Steps'
+            result += f' {NumberConverter.to_string(self.steps)} Steps'
         return result
 
 
@@ -145,11 +146,7 @@ class VoiceModelParser:
             return -1
         result = matches[0].strip()
         epoch, _ = result.split(' ')
-        if 'k' in epoch.lower():
-            epoch = epoch.lower().replace('k', '')
-            epoch = float(epoch) * 1000
-        result = int(epoch)
-        return result
+        return NumberConverter.from_string(epoch)
 
     @property
     def epochs(self) -> int:
@@ -171,11 +168,7 @@ class VoiceModelParser:
             return -1
         result = matches[0].strip()
         steps, _ = result.split(' ')
-        if 'k' in steps.lower():
-            steps = steps.lower().replace('k', '')
-            steps = float(steps) * 1000
-        result = int(steps)
-        return result
+        return NumberConverter.from_string(steps)
 
     @property
     def steps(self) -> int:
@@ -272,10 +265,10 @@ class VoiceModelParser:
         if self.epochs == -1:
             result['info'] = 'No additional info'
         else:
-            result['info'] = f'{self.epochs} Epochs'
+            result['info'] = f'{NumberConverter.to_string(self.epochs)} Epochs'
             # add steps if present
             if self.steps != -1:
-                result['info'] += f' {self.steps} Steps'
+                result['info'] += f' {NumberConverter.to_string(self.steps)} Steps'
         result['release_date'] = self.release_date.strftime('%Y-%m-%d')
         if self.links:
             result['download_link'] = self.links[0]

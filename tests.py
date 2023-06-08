@@ -2,6 +2,7 @@ import unittest
 
 from package.parsers.forum import DiscordForumParser
 from package.parsers.voice_model import VoiceModel, VoiceModelParser
+from package.utils.converters import NumberConverter
 
 
 class ParserTests(unittest.TestCase):
@@ -51,12 +52,27 @@ class ParserTests(unittest.TestCase):
         self.assertEqual(VoiceModelParser.extract_links(sample3), sample3_links)
 
 
+class TestNumberConverter(unittest.TestCase):
+    
+    def test_to_str(self):
+        self.assertEqual(NumberConverter.to_string(1000), '1k')
+        self.assertEqual(NumberConverter.to_string(4000), '4k')
+        self.assertEqual(NumberConverter.to_string(44100), '44.1k')
+        self.assertEqual(NumberConverter.to_string(600), '600')
+
+    def test_from_str(self):
+        self.assertEqual(NumberConverter.from_string('44.1k'), 44100)
+        self.assertEqual(NumberConverter.from_string('44.1K'), 44100)
+        self.assertEqual(NumberConverter.from_string('1k'), 1000)
+        self.assertEqual(NumberConverter.from_string('600'), 600)
+
+
 class TestVoiceModel(unittest.TestCase):
 
     def setUp(self):
         self.voice1 = VoiceModel(title='Jihyo (From TWICE)', epochs=1000)
         self.voice2 = VoiceModel(title='BLACKPINK JENNIE', type='RVC v2', epochs=400, steps=44100)
-        self.voice3 = VoiceModel(title='Rosé', type='RVC v2', epochs=400, steps=44100)
+        self.voice3 = VoiceModel(title='Rosé', type='RVC v2', epochs=1200, steps=44100)
 
     def tearDown(self):
         del self.voice1
@@ -79,9 +95,9 @@ class TestVoiceModel(unittest.TestCase):
 
     # string representation
     def test_voice_to_str(self):
-        self.assertEqual(str(self.voice1), 'Jihyo (From TWICE) (RVC) 1000 Epochs')
-        self.assertEqual(str(self.voice2), 'Jennie (From BLACKPINK) (RVC v2) 400 Epochs 44100 Steps')
-        self.assertEqual(str(self.voice3), 'Rosé (RVC v2) 400 Epochs 44100 Steps')
+        self.assertEqual(str(self.voice1), 'Jihyo (From TWICE) (RVC) 1k Epochs')
+        self.assertEqual(str(self.voice2), 'Jennie (From BLACKPINK) (RVC v2) 400 Epochs 44.1k Steps')
+        self.assertEqual(str(self.voice3), 'Rosé (RVC v2) 1.2k Epochs 44.1k Steps')
 
 if __name__ == '__main__':
     unittest.main()
