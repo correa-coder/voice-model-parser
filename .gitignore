@@ -8,5 +8,6 @@ pip-delete-this-directory.txt
 
 # Other:
 pages/
+dumps/
 data.json
 *.log

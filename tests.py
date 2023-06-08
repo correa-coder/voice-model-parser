@@ -1,6 +1,7 @@
 import unittest
 
-from utils.parsers import VoiceModelParser
+from package.parsers.forum import DiscordForumParser
+from package.parsers.voice_model import VoiceModel, VoiceModelParser
 
 
 class ParserTests(unittest.TestCase):
