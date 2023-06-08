@@ -231,11 +231,23 @@ class VoiceModelParser:
             print('✓ Band/Group')
         if ' of ' in title.lower():
             print('❌ Band/Group name should be in parenthesis')
-        
 
-    def extract_model(self):
-        """Creates a `VoiceModel` object from the html content"""
-        return None
+    def extract_model(self) -> VoiceModel:
+        """Returns a `VoiceModel` object"""
+        links = self.links
+        download_link = ''
+        if len(links) > 0:
+            # if multiple links found get the first one
+            download_link = links[0]
+
+        model = VoiceModel(
+            title=self.name,
+            type=self.category,
+            download_link=download_link,
+            epochs=self.epochs,
+            steps=self.steps
+        )
+        return model
 
     def view_data(self):
         """Shows the data that has been extracted"""

@@ -38,13 +38,12 @@ def quick_testing():
         html_data = BeautifulSoup(f, 'html.parser')
 
     forum_parser = DiscordForumParser(html_data)
-    # print(forum_parser.dump())   
+    model_parser = VoiceModelParser(html_data, forum_parser)
 
     print(forum_parser.title)
-    # print(forum_parser.reactions_count)
-    # print(forum_parser.replies)
 
-    print(forum_parser.replies)
+    voice_model = model_parser.extract_model()
+    print(str(voice_model))
     
     #post = forum_parser.post_content
     #print(post)
