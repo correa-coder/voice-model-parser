@@ -5,15 +5,14 @@ from bs4 import BeautifulSoup
 
 class PostMessage:
 
-    def __init__(self, title:str, author:str, content:str, publish_date:datetime.datetime):
+    def __init__(
+            self, author:str, content:str,
+            publish_date:datetime.datetime, title:str='', reaction_count:int=0):
         self.title = title
         self.author = author
         self.content = content
         self.publish_date = publish_date
-
-    @property
-    def reaction_count(self) -> int:
-        ...
+        self.reaction_count = reaction_count
 
     def __str__(self) -> str:
         result = '\n'
@@ -105,20 +104,6 @@ class DiscordForumParser:
     @property
     def replies(self) -> List[PostMessage]:
         """List containing the post replies"""
-        list_items = self.chat_messages.find_all('li', attrs={'class': 'messageListItem-ZZ7v6g'})
-        post_title = ''
-        print(post_title)
-        post_date:str = list_items[0].find_all('time')[0]['datetime'][:10]
-        post_date:datetime.datetime = datetime.datetime.strptime(post_date, '%Y-%m-%d')
-        post_message = PostMessage(
-            title=post_title,
-            author='',
-            content='',
-            publish_date=post_date
-        )
-        #print(post_message)
-        #for item in list_items:
-            #print(item.find())
         return list()
     
     @property
@@ -141,17 +126,39 @@ class DiscordForumParser:
             links.append(link.get('href'))
         return links
     
+    @property
+    def text(self) -> str:
+        """Returns all text found in the post"""
+        found_text = ''
+        messages_wrapper = self.root_element.find('div', attrs={'class': 'messagesWrapper-RpOMA3'})
+        messages_scroller_inner = messages_wrapper.find('ol', attrs={'data-list-id': 'chat-messages'})
+        chat_messages_container = messages_scroller_inner.find_all('li', attrs={'class': 'messageListItem-ZZ7v6g'})
+        for msg in chat_messages_container:
+            msg_author = msg.find('span', attrs={'class': 'username-h_Y3Us'})
+            msg_time = msg.find('time')
+            msg_content = msg.find('div', attrs={'class': 'markup-eYLPri messageContent-2t3eCI'})
+            if msg_author:
+                found_text += f'\n[{msg_author.text}]\n'
+            found_text += msg_time.text + '\n'
+            found_text += msg_content.text + '\n'
+        return found_text
+    
     def dump(self) -> str:
         content = ''
         content += f'Title: {self.title}\n'
         content += f'Tags: {self.tags}\n'
         content += f'Author: {self.author}\n'
         content += f'Publish date: {self.publish_date.strftime("%Y-%m-%d")}\n'
+        content += f'Total reactions: {self.reactions_count}\n\n'
         content += f'Original message:\n{self.message}\n'
         content += '-' * 128 + '\n'
         content += f'Replies:\n'
-        for reply in self.replies:
-            print(f'Reply:\n{reply}\n')
+        if not self.replies:
+            content += 'No replies\n'
+        else:
+            for reply in self.replies:
+                content += f'\t{reply.author} - {reply.publish_date.strftime("%Y-%m-%d")}:\n'
+                content += f'\t{reply.content}\n'
         return content
     
     def get_post_message(self) -> PostMessage:
