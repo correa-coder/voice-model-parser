@@ -50,5 +50,38 @@ class ParserTests(unittest.TestCase):
         ]
         self.assertEqual(VoiceModelParser.extract_links(sample3), sample3_links)
 
+
+class TestVoiceModel(unittest.TestCase):
+
+    def setUp(self):
+        self.voice1 = VoiceModel(title='Jihyo (From TWICE)', epochs=1000)
+        self.voice2 = VoiceModel(title='BLACKPINK JENNIE', type='RVC v2', epochs=400, steps=44100)
+        self.voice3 = VoiceModel(title='Rosé', type='RVC v2', epochs=400, steps=44100)
+
+    def tearDown(self):
+        del self.voice1
+        del self.voice2
+        del self.voice3
+
+    def test_voice_group(self):
+        self.assertTrue(self.voice1.has_group)
+        self.assertTrue(self.voice2.has_group)
+        self.assertFalse(self.voice3.has_group)
+
+        self.assertEqual(self.voice1.group, 'TWICE')
+        self.assertEqual(self.voice2.group, 'BLACKPINK')
+        self.assertEqual(self.voice3.group, 'No Group')
+
+    def test_voice_name(self):
+        self.assertEqual(self.voice1.name, 'Jihyo')
+        self.assertEqual(self.voice2.name, 'Jennie')
+        self.assertEqual(self.voice3.name, 'Rosé')
+
+    # string representation
+    def test_voice_to_str(self):
+        self.assertEqual(str(self.voice1), 'Jihyo (From TWICE) (RVC) 1000 Epochs')
+        self.assertEqual(str(self.voice2), 'Jennie (From BLACKPINK) (RVC v2) 400 Epochs 44100 Steps')
+        self.assertEqual(str(self.voice3), 'Rosé (RVC v2) 400 Epochs 44100 Steps')
+
 if __name__ == '__main__':
     unittest.main()

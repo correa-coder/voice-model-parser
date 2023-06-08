@@ -7,7 +7,61 @@ from .forum import DiscordForumParser
 
 
 class VoiceModel:
-    ...
+    
+    def __init__(self, title:str, type:str='RVC', download_link:str='', epochs:int=-1, steps:int=-1):
+        self.title = title
+        self.type = type
+        self.download_link = download_link
+        self.epochs = epochs
+        self.steps = steps
+        self.__group = 'No Group'
+
+    @property
+    def has_group(self) -> bool:
+        return self.group != 'No Group'
+
+    @property
+    def group(self) -> str:
+        # Remove parenthesis from title if any
+        title = self.title.replace('(', '').replace(')', '')
+        if 'from' in title.lower():
+            start_index = title.lower().find('from')
+            return title[start_index+5:].strip()
+        if self.__group == 'No Group':
+            # check common groups
+            common_groups = ['TWICE', 'BLACKPINK', 'LE SSERAFIM']
+            for grp in common_groups:
+                if grp.lower() in title.lower():
+                    return grp
+        return self.__group
+
+    @group.setter
+    def group(self, text:str):
+        self.__group = text
+
+    @property
+    def name(self) -> str:
+        result = self.title
+        if self.has_group:
+            _name = self.title.replace(self.group, '')
+            _name = _name.replace('(', '').replace(')', '')
+            _name = _name.replace('From', '')
+            _name = _name.replace('from', '')
+            return _name.strip().title()
+        return result
+
+    def __str__(self) -> str:
+        result = f'{self.name}'
+        if self.has_group:
+            result += f' (From {self.group})'
+        
+        result += f' ({self.type})'
+
+        if self.epochs != -1:
+            result += f' {self.epochs} Epochs'
+        if self.steps != -1:
+            result += f' {self.steps} Steps'
+        return result
 
 
 class VoiceModelParser:
