@@ -32,23 +32,21 @@ def get_html_files(directory:Path) -> List[Path]:
 
 def quick_testing():
     # test only one html file
-    html_file = get_html_files(HTML_DIR)[1]
+    html_file = get_html_files(HTML_DIR)[0]
     fp = html_file
     with open(fp, mode='r', encoding='utf-8') as f:
         html_data = BeautifulSoup(f, 'html.parser')
 
     forum_parser = DiscordForumParser(html_data)
-    model_parser = VoiceModelParser(html_data, forum_parser)
+    model_parser = VoiceModelParser(forum_parser)
 
-    print(forum_parser.title)
+    model_parser.view_data()
 
     voice_model = model_parser.extract_model()
     print(str(voice_model))
     
     #post = forum_parser.post_content
     #print(post)
-
-
 
     #for reply in forum_parser.replies:
         #print(reply)

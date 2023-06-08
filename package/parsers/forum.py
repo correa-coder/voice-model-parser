@@ -133,6 +133,14 @@ class DiscordForumParser:
         content.replies = self.replies
         return content
     
+    @property
+    def links(self) -> List[str]:
+        """All links found in the post"""
+        links = []
+        for link in self.chat_messages_contents.find_all('a'):
+            links.append(link.get('href'))
+        return links
+    
     def dump(self) -> str:
         content = ''
         content += f'Title: {self.title}\n'

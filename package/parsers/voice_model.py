@@ -1,7 +1,5 @@
-import datetime
 import re
 from typing import List
-from bs4 import BeautifulSoup
 
 from .forum import DiscordForumParser
 from ..utils.converters import NumberConverter
@@ -67,14 +65,8 @@ class VoiceModel:
 
 class VoiceModelParser:
 
-    def __init__(self, html_data: BeautifulSoup, forum_parser: DiscordForumParser):
+    def __init__(self, forum_parser: DiscordForumParser):
         self.forum_parser = forum_parser
-        # start searching data from this section html element
-        self.root_element = html_data.find('section', attrs={'role': 'complementary'})
-        self.messages_wrapper = self.root_element.contents[1]
-        self.chat_messages = self.messages_wrapper.find('ol', attrs={'data-list-id': 'chat-messages'})
-        self.chat_title_container = self.chat_messages.contents[1]
-        self.chat_messages_contents = self.chat_messages.find('li').contents[0].contents[0]
 
     @property
     def title(self) -> str:
@@ -176,17 +168,16 @@ class VoiceModelParser:
 
     @property
     def links(self) -> List[str]:
-        """Returns links found within the post (except from comments)"""
-        links = []
+        """Download links links found in the post (except from post replies)"""
+        all_links = self.forum_parser.links
         # Filter download links
-        allowed_links = ['drive.google.com', 'mega.nz', 'mediafire', 'pixeldrain', 'krakenfiles']
+        valid_download_providers = ['drive.google.com', 'mega.nz', 'mediafire', 'pixeldrain', 'krakenfiles']
         links_filtered = []
-        for link in self.chat_messages_contents.find_all('a'):
-            # TODO: Filter links
-            links.append(link.get('href'))
-        # TODO: If links not found, search in author comments
-        # sometimes they forgot and add the link later in a comment
-        return links
+        for link in all_links:
+            for valid_provider in valid_download_providers:
+                if valid_provider in link:
+                    links_filtered.append(link)
+        return links_filtered
     
     @staticmethod
     def extract_links(text:str) -> List[str]:
@@ -245,18 +236,18 @@ class VoiceModelParser:
     def view_data(self):
         """Shows the data that has been extracted"""
         print('Title:', self.title)
-        print('Author:', self.author)
+        print('Author:', self.forum_parser.author)
         print('Tags:', self.tags)
         print('Category:', self.category)
         print('Epochs:', self.epochs)
         print('Steps:', self.steps)
-        print('Date:', self.release_date.strftime('%Y-%m-%d'))
+        print('Date:', self.forum_parser.publish_date.strftime('%Y-%m-%d'))
         print('Model:', self.name)
         if not self.links:
             print('Couldn\'t find any download link')
         else:
             print('Links:', self.links)
-        print('\nOriginal message:\n', self.message)
+        print('\nOriginal message:\n', self.forum_parser.message)
         print()
 
     def to_dict(self) -> dict:
