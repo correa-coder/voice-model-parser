@@ -12,11 +12,13 @@ class VoiceModel:
             author:str,
             tags: List[str],
             download_link:str='',
+            release_date:str='',
             epochs:int=-1, steps:int=-1):
         self.title = title
         self.author = author
         self.tags = tags
         self.download_link = download_link
+        self.release_date = release_date
         self.epochs = epochs
         self.steps = steps
         self.__type = 'RVC'  # Defaults to RVC
@@ -172,6 +174,7 @@ class VoiceModelParser:
             author=self.forum_parser.author,
             tags=self.tags,
             download_link=download_link,
+            release_date=self.forum_parser.publish_date.strftime('%Y-%m-%d'),
             epochs=self.epochs,
             steps=self.steps
         )

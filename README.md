@@ -105,6 +105,7 @@ voice_model = model_parser.extract_model()
 print('Title:', voice_model.title)
 print('Author:', voice_model.author)
 print('Tags:', voice_model.tags)
+print('Release date:', voice_model.release_date)
 print('Has group:', voice_model.has_group)
 print('Group:', voice_model.group)
 print('Type:', voice_model.type)
@@ -123,6 +124,7 @@ Output:
 Title: Alvin Seville (From Alvin and The Chipmunks)
 Author: yeey5
 Tags: ['RVC', 'Fictional Character']
+Release date: '2023-06-03'
 Has group: True
 Group: Alvin and The Chipmunks
 Type: RVC

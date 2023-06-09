@@ -11,7 +11,7 @@ from typing import List
 
 from package.parsers.forum import DiscordForumParser
 from package.parsers.voice_model import VoiceModel, VoiceModelParser
-from package.utils.helpers import get_html_files, load_html, save_text
+from package.utils.helpers import get_html_files, load_html, load_json, save_text
 
 BASE_DIR = Path(__file__).parent
 HTML_DIR = BASE_DIR / 'pages'  # look for .html files in this directory
@@ -27,11 +27,12 @@ logger.addHandler(file_handler)
 
 def main():
     html_files = get_html_files(HTML_DIR)
-    total_files = len(html_files)
-    previous_data = {}
-    with open(BASE_DIR / 'data.json', 'r', encoding='utf8') as json_f:
-        previous_data = json.load(json_f)
-    new_data = {'voice_models': [{'test': 123}]}  # this will be saved to data.json
+    total_files_analyzed = len(html_files)
+
+    previous_data = load_json(BASE_DIR / 'data.json')
+    if previous_data == {}:
+        previous_data = {'voice_models': []}
+    new_data = {'voice_models': []}  # this will be merged with previous_data and saved to data.json
 
     # fp = File path
     for fp in html_files[:3]:
@@ -46,24 +47,16 @@ def main():
 
             # don't add to json if there's no link
             if not model_parser.links:
-                print(f'No links founds for {model_parser.title} manually analyze it by looking {dump_filename}')
-
-                date_format = "%Y-%m-%d"
-                dump_filename = f'{datetime.datetime.now().strftime(date_format)} - {forum_parser.title}.txt'
-                logger.warning()
-                save_text(model_parser.text, BASE_DIR / 'dumps', dump_filename)
+                logger.warning(f'No link found for {model_parser.title}')
+                print(f'No link found for {model_parser.title}, manually analyze it by looking the dumps folder')
+                forum_parser.save_extracted_text()
                 continue
 
             # don't add to json if there are multiple links
             if len(model_parser.links) > 1:
                 logger.warning(f'Multiple links found for {model_parser.title}')
-
-                date_format = "%Y-%m-%d"
-                dump_filename = f'{datetime.datetime.now().strftime(date_format)} - {forum_parser.title}.txt'
-                save_text(model_parser.text, BASE_DIR / 'dumps', dump_filename)
-                logger.warning(f'Multiple links founds, manually analize it by looking {dump_filename}')
-
-                print(f'Multiple links found, skipping {model_parser.title}')
+                print(f'Multiple links found for {model_parser.title}, manually analyze it by looking the dumps folder')
+                forum_parser.save_extracted_text()
             else:
                 # if there's only one link allow saving the data to json
                 voice_model = model_parser.extract_model()
