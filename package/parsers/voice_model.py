@@ -7,9 +7,17 @@ from ..utils.helpers import NumberConverter
 
 class VoiceModel:
     
-    def __init__(self, title:str, author:str, type:str='RVC', download_link:str='', epochs:int=-1, steps:int=-1):
+    def __init__(
+            self,
+            title:str,
+            author:str,
+            tags: List[str],
+            type:str='RVC',
+            download_link:str='',
+            epochs:int=-1, steps:int=-1):
         self.title = title
         self.author = author
+        self.tags = tags
         self.type = type
         self.download_link = download_link
         self.epochs = epochs
@@ -228,6 +236,7 @@ class VoiceModelParser:
             title=self.name,
             author=self.forum_parser.author,
             type=self.category,
+            tags=self.tags,
             download_link=download_link,
             epochs=self.epochs,
             steps=self.steps
