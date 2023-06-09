@@ -2,7 +2,7 @@ import re
 from typing import List
 
 from .forum import DiscordForumParser
-from ..utils.helpers import NumberConverter
+from ..utils.helpers import NumberConverter, InfoExtractor
 
 
 class VoiceModel:
@@ -117,40 +117,8 @@ class VoiceModelParser:
     def name(self) -> str:
         """Returns the voice model name extracted from the title"""
         is_rvc_model:bool = self.category.startswith('RVC')
-        return self.extract_name(self.title, is_rvc_model)
+        return InfoExtractor.extract_name(self.title, is_rvc_model)
     
-    @staticmethod
-    def extract_name(text:str, is_rvc:bool=True) -> str:
-        """Removes epochs and steps info from a string"""
-        result = ''
-        if is_rvc:
-            # try to find (RVC) or RVC in the title and remove it and everything after
-            if '(rvc' in text.lower():
-                # Artist (RVC) 300 epochs -> Artist
-                # Artist (From Band) (RVC v2) 300 epochs -> Artist (From Band)
-                extra_info_index = text.lower().find('(rvc')
-                result = text[:extra_info_index].strip()
-            elif 'rvc' in text.lower():
-                # Artist RVC 300 epochs -> Artist
-                extra_info_index = text.lower().find('rvc')
-                result = text[:extra_info_index].strip()
-            else:
-                # on failure returns the original string
-                result = text
-        else:
-            # SVC models
-            # Try to find the number of steps and remove it and everything after
-            # Artist 100k -> Artist
-            pattern = r'\s\d+[k]?'
-            matches = re.findall(pattern, text)
-            # if nothing found returns the original string
-            if not matches:
-                result = text
-            else:
-                extra_info_index = text.find(matches[0])
-                result = text[:extra_info_index]
-        return result
-
     @property
     def tags(self) -> List[str]:
       """Post tags such as RVC, Korean, Rapper etc."""
@@ -164,47 +132,17 @@ class VoiceModelParser:
             if 'RVC V2' in tag:
               result += ' v2'
         return result
-    
-    @staticmethod
-    def extract_epochs(text:str) -> int:
-        """Attempts to extract epochs from a string, returns -1 on failure"""
-        pattern = r'\(?\d+\.?\d*[k]? epoch[s]?\)?'
-        text = text.lower()
-        # remove parenthesis
-        text = text.replace('(', '').replace(')', '')
-        matches = re.findall(pattern, text)
-        if not matches:
-            # cound't find the epochs
-            return -1
-        result = matches[0].strip()
-        epoch, _ = result.split(' ')
-        return NumberConverter.from_string(epoch)
 
     @property
     def epochs(self) -> int:
         result = -1
         if self.category.startswith('RVC'):
-          result = self.extract_epochs(self.title)
+          result = InfoExtractor.extract_epochs(self.title)
         return result
-    
-    @staticmethod
-    def extract_steps(text:str) -> int:
-        """Attempts to extract steps from a string, returns -1 on failure"""
-        pattern = r'\(?\d+\.?\d*[k]? step[s]?\)?'
-        text = text.lower()
-        # remove parenthesis
-        text = text.replace('(', '').replace(')', '')
-        matches = re.findall(pattern, text)
-        if not matches:
-            # cound't find the epochs
-            return -1
-        result = matches[0].strip()
-        steps, _ = result.split(' ')
-        return NumberConverter.from_string(steps)
 
     @property
     def steps(self) -> int:
-        return self.extract_steps(self.title)
+        return InfoExtractor.extract_steps(self.title)
 
     @property
     def links(self) -> List[str]:
@@ -219,23 +157,9 @@ class VoiceModelParser:
                     links_filtered.append(link)
         # if links not found in the post, look for it in the comments
         if len(links_filtered) < 1:
-            links_filtered = self.extract_links(self.forum_parser.text)
+            links_filtered = InfoExtractor.extract_links(self.forum_parser.text)
         return links_filtered
     
-    @staticmethod
-    def extract_links(text:str) -> List[str]:
-        """Attempt to extract links from a string (currently only google drive and mega)"""
-        if 'drive.google.com/' in text:
-            pattern = r'https://drive.google.com/file/d/.{33}/view\?usp=(sharing|drive_link)'
-            matches = re.finditer(pattern, text)
-            return [m.group(0) for m in matches]
-        elif 'mega.nz/' in text:
-            pattern= r'https://mega.nz/file/.{52}'
-        else:
-            return list()  # returns an empty list if google drive or mega link not found
-        found_links = re.findall(pattern, text)
-        return found_links
-
     def extract_model(self) -> VoiceModel:
         """Returns a `VoiceModel` object"""
         links = self.links

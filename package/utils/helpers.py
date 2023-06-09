@@ -1,4 +1,5 @@
 import pathlib
+import re
 import json
 import shutil
 from typing import List
@@ -24,6 +25,85 @@ class NumberConverter:
             number = text.replace('k', '')
             return int(float(number) * 1000)
         return int(text)
+    
+
+class InfoExtractor:
+
+    @staticmethod
+    def extract_name(text:str, is_rvc:bool=True) -> str:
+        """Removes epochs and steps info from a string"""
+        result = ''
+        if is_rvc:
+            # try to find (RVC) or RVC in the title and remove it and everything after
+            if '(rvc' in text.lower():
+                # Artist (RVC) 300 epochs -> Artist
+                # Artist (From Band) (RVC v2) 300 epochs -> Artist (From Band)
+                extra_info_index = text.lower().find('(rvc')
+                result = text[:extra_info_index].strip()
+            elif 'rvc' in text.lower():
+                # Artist RVC 300 epochs -> Artist
+                extra_info_index = text.lower().find('rvc')
+                result = text[:extra_info_index].strip()
+            else:
+                # on failure returns the original string
+                result = text
+        else:
+            # SVC models
+            # Try to find the number of steps and remove it and everything after
+            # Artist 100k -> Artist
+            pattern = r'\s\d+[k]?'
+            matches = re.findall(pattern, text)
+            # if nothing found returns the original string
+            if not matches:
+                result = text
+            else:
+                extra_info_index = text.find(matches[0])
+                result = text[:extra_info_index]
+        return result
+    
+    @staticmethod
+    def extract_epochs(text:str) -> int:
+        """Attempts to extract epochs from a string, returns -1 on failure"""
+        pattern = r'\(?\d+\.?\d*[k]? epoch[s]?\)?'
+        text = text.lower()
+        # remove parenthesis
+        text = text.replace('(', '').replace(')', '')
+        matches = re.findall(pattern, text)
+        if not matches:
+            # cound't find the epochs
+            return -1
+        result = matches[0].strip()
+        epoch, _ = result.split(' ')
+        return NumberConverter.from_string(epoch)
+    
+    @staticmethod
+    def extract_steps(text:str) -> int:
+        """Attempts to extract steps from a string, returns -1 on failure"""
+        pattern = r'\(?\d+\.?\d*[k]? step[s]?\)?'
+        text = text.lower()
+        # remove parenthesis
+        text = text.replace('(', '').replace(')', '')
+        matches = re.findall(pattern, text)
+        if not matches:
+            # cound't find the epochs
+            return -1
+        result = matches[0].strip()
+        steps, _ = result.split(' ')
+        return NumberConverter.from_string(steps)
+    
+    @staticmethod
+    def extract_links(text:str) -> List[str]:
+        """Attempt to extract links from a string (currently only google drive and mega)"""
+        if 'drive.google.com/' in text:
+            pattern = r'https://drive.google.com/file/d/.{33}/view\?usp=(sharing|drive_link)'
+            matches = re.finditer(pattern, text)
+            return [m.group(0) for m in matches]
+        elif 'mega.nz/' in text:
+            pattern= r'https://mega.nz/file/.{52}'
+        else:
+            return list()  # returns an empty list if google drive or mega link not found
+        found_links = re.findall(pattern, text)
+        return found_links
     
 
 def load_html(src:pathlib.Path) -> BeautifulSoup:
