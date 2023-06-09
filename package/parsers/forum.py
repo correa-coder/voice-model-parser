@@ -1,4 +1,5 @@
 import datetime
+import pathlib
 from typing import List
 from bs4 import BeautifulSoup
 
@@ -131,23 +132,15 @@ class DiscordForumParser:
             found_text += msg_content.text + '\n'
         return found_text
     
-    def dump(self) -> str:
-        content = ''
-        content += f'Title: {self.title}\n'
-        content += f'Tags: {self.tags}\n'
-        content += f'Author: {self.author}\n'
-        content += f'Publish date: {self.publish_date.strftime("%Y-%m-%d")}\n'
-        content += f'Total reactions: {self.reactions_count}\n\n'
-        content += f'Original message:\n{self.message}\n'
-        content += '-' * 128 + '\n'
-        content += f'Replies:\n'
-        if not self.replies:
-            content += 'No replies\n'
-        else:
-            for reply in self.replies:
-                content += f'\t{reply.author} - {reply.publish_date.strftime("%Y-%m-%d")}:\n'
-                content += f'\t{reply.content}\n'
-        return content
+    def save_extracted_text(self):
+        # Saves all extracted text from the page to a text file
+        filename = f'{datetime.date.today()} - {self.title}.txt'
+        basedir = pathlib.Path(__file__).parent.parent.parent / 'dumps'
+        if not basedir.exists():
+            basedir.mkdir()
+        fp = basedir / filename
+        with open(fp, mode='a', encoding='utf8') as f:
+            f.write(self.text)
     
     def get_post_message(self) -> PostMessage:
         return PostMessage(

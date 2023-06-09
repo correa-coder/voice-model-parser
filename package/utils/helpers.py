@@ -123,8 +123,6 @@ def save_text(text:str, dest:pathlib.Path, filename:str):
 def get_html_files(directory:pathlib.Path) -> List[pathlib.Path]:
     return [f for f in directory.iterdir() if (f.is_file() and f.suffix == '.html')]
 
-# TODO: create save dump function
-
 # TODO: create archive function to move files to archived folder
 
 
@@ -150,7 +148,6 @@ def load_json(fp:pathlib.Path) -> dict:
         with open(fp, 'r', encoding='utf8') as f:
             data = json.load(f)
     except Exception as e:
-        print(e.__class__)
         print(f'Failed to load {fp.name} from {fp.parent}')
     return data
         
