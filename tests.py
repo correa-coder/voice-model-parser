@@ -70,9 +70,9 @@ class TestNumberConverter(unittest.TestCase):
 class TestVoiceModel(unittest.TestCase):
 
     def setUp(self):
-        self.voice1 = VoiceModel(title='Jihyo (From TWICE)', epochs=1000)
-        self.voice2 = VoiceModel(title='BLACKPINK JENNIE', type='RVC v2', epochs=400, steps=44100)
-        self.voice3 = VoiceModel(title='Rosé', type='RVC v2', epochs=1200, steps=44100)
+        self.voice1 = VoiceModel(title='Jihyo (From TWICE)', author='user1', epochs=1000)
+        self.voice2 = VoiceModel(title='BLACKPINK JENNIE', author='user2',  type='RVC v2', epochs=400, steps=44100)
+        self.voice3 = VoiceModel(title='Rosé', author='user3', type='RVC v2', epochs=1200, steps=44100)
 
     def tearDown(self):
         del self.voice1

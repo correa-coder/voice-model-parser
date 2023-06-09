@@ -5,15 +5,13 @@ import datetime
 import time
 import json
 import shutil
-from pprint import pprint
 from pathlib import Path
 from typing import List
 
-from bs4 import BeautifulSoup
 
 from package.parsers.forum import DiscordForumParser
 from package.parsers.voice_model import VoiceModel, VoiceModelParser
-from package.utils.helpers import load_html
+from package.utils.helpers import get_html_files, load_html, save_text
 
 BASE_DIR = Path(__file__).parent
 HTML_DIR = BASE_DIR / 'pages'  # look for .html files in this directory
@@ -27,28 +25,6 @@ file_handler.setFormatter(logging.Formatter('[%(levelname)s] %(asctime)s - %(mes
 logger.addHandler(file_handler)
 
 
-def get_html_files(directory:Path) -> List[Path]:
-    return [f for f in directory.iterdir() if (f.is_file() and f.suffix == '.html')]
-
-
-def quick_testing():
-    # test only one html file
-    html_file = get_html_files(HTML_DIR)[1]
-    html_data = load_html(html_file)
-
-    forum_parser = DiscordForumParser(html_data)
-    print(forum_parser.text)
-
-    # print(forum_parser.dump())
-
-    model_parser = VoiceModelParser(forum_parser)
-
-    # model_parser.view_data()
-
-    voice_model = model_parser.extract_model()
-    print(str(voice_model))
-
-
 def main():
     html_files = get_html_files(HTML_DIR)
     total_files = len(html_files)
@@ -58,45 +34,60 @@ def main():
     new_data = {'voice_models': [{'test': 123}]}  # this will be saved to data.json
 
     # fp = File path
-    for fp in html_files:
+    for fp in html_files[:3]:
         logger.info(f'Analyzing {fp.name}...')
         time.sleep(0.05)
-        with open(fp, mode='r', encoding='utf-8') as f:
-            html_data = BeautifulSoup(f, 'html.parser')
+        html_data = load_html(fp)
 
         try:
-            parser = VoiceModelParser(html_data)
-            parser.view_data()
-            if parser.links:
-                # only add to json if found download links and there's only one link
-                if len(parser.links) > 1:
-                    logger.warning(f'Multiple links found, skipping {parser.title}')
-                else:
-                    new_data['voice_models'].append(parser.to_dict())
-                    # move to archived folder if everything went well
-                    try:
-                        shutil.move(str(fp), str(BASE_DIR / 'pages' / 'archived'))
-                        logger.info(f'Moved {fp.name} to archive')
-                        logger.info(f'OK - {parser.title}')
-                    except Exception as e:
-                        logger.error(f'Failed to move {fp.name} to archive')
-                        logger.exception(e)
+            forum_parser = DiscordForumParser(html_data)
+            model_parser = VoiceModelParser(forum_parser)
+
+            # don't add to json if there's no link
+            if not model_parser.links:
+                print(f'No links found for {model_parser.title}, skipping...')
+                date_format = "%Y-%m-%d"
+                dump_filename = f'{datetime.datetime.now().strftime(date_format)} - {forum_parser.title}.txt'
+                logger.warning(f'No links founds, manually analize it by looking {dump_filename}')
+                save_text(model_parser.text, BASE_DIR / 'dumps', dump_filename)
+                continue
+
+            # don't add to json if there are multiple links
+            if len(model_parser.links) > 1:
+                logger.warning(f'Multiple links found for {model_parser.title}')
+
+                date_format = "%Y-%m-%d"
+                dump_filename = f'{datetime.datetime.now().strftime(date_format)} - {forum_parser.title}.txt'
+                save_text(model_parser.text, BASE_DIR / 'dumps', dump_filename)
+                logger.warning(f'Multiple links founds, manually analize it by looking {dump_filename}')
+
+                print(f'Multiple links found, skipping {model_parser.title}')
             else:
-                logger.warning(f'No download links for {parser.title}')
-        except IndexError as e:
-            logger.error(f'FAIL - {parser.title} (Couldn\'t extract epochs)')
-            logger.exception(e)
+                # if there's only one link allow saving the data to json
+                voice_model = model_parser.extract_model()
+                # TODO: fix release date
+                new_data['voice_models'].append(voice_model.to_dict())
+
+                # move to archived folder if everything went well
+                try:
+                    # TODO: create archive folder if doesn't exist
+                    #shutil.move(str(fp), str(BASE_DIR / 'pages' / 'archived'))
+                    logger.info(f'Moved {fp.name} to archive')
+                    logger.info(f'OK - {model_parser.title}')
+                except Exception as e:
+                    logger.error(f'Failed to move {fp.name} to archive')
+                    logger.exception(e)
         except Exception as e:
-            logger.error(f'FAIL - {parser.title}')
+            logger.error(f'FAIL - {model_parser.title}')
             logger.exception(e)
 
         print('-' * 128)
         print()
 
-    with open(BASE_DIR / 'data.json', 'w', encoding='utf8') as json_f:
+    #with open(BASE_DIR / 'data.json', 'w', encoding='utf8') as json_f:
         # merge the new data with previous one
-        previous_data['voice_models'] +=  new_data['voice_models']
-        json.dump(previous_data, json_f, indent=4)
+        #previous_data['voice_models'] +=  new_data['voice_models']
+        #json.dump(previous_data, json_f, indent=4)
 
     message = f'{total_files} file(s) analyzed. See "{log_file_path.name}" for more details.\n\n'
     print(message)
@@ -104,4 +95,4 @@ def main():
 
 if __name__ == '__main__':
     #main()
-    quick_testing()
+    ...

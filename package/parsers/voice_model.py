@@ -7,8 +7,9 @@ from ..utils.helpers import NumberConverter
 
 class VoiceModel:
     
-    def __init__(self, title:str, type:str='RVC', download_link:str='', epochs:int=-1, steps:int=-1):
+    def __init__(self, title:str, author:str, type:str='RVC', download_link:str='', epochs:int=-1, steps:int=-1):
         self.title = title
+        self.author = author
         self.type = type
         self.download_link = download_link
         self.epochs = epochs
@@ -48,6 +49,25 @@ class VoiceModel:
             _name = _name.replace('from', '')
             return _name.strip().title()
         return result.title()
+    
+    def to_dict(self) -> dict:
+        result = {}
+        result['name'] = self.name
+        if self.epochs == -1:
+            result['info'] = 'No additional info'
+        else:
+            result['info'] = f'{NumberConverter.to_string(self.epochs)} Epochs'
+            # add steps if present
+            if self.steps != -1:
+                result['info'] += f' {NumberConverter.to_string(self.steps)} Steps'
+        result['release_date'] = self.release_date.strftime('%Y-%m-%d')
+        if self.links:
+            result['download_link'] = self.links[0]
+        else:
+            result['download_link'] = ''
+        result['category'] = self.category
+        result['author'] = self.author
+        return result
 
     def __str__(self) -> str:
         result = f'{self.name}'
@@ -178,7 +198,8 @@ class VoiceModelParser:
                 if valid_provider in link:
                     links_filtered.append(link)
         # if links not found in the post, look for it in the comments
-        links_filtered = self.extract_links(self.forum_parser.text)
+        if len(links_filtered) < 1:
+            links_filtered = self.extract_links(self.forum_parser.text)
         return links_filtered
     
     @staticmethod
@@ -195,31 +216,6 @@ class VoiceModelParser:
         found_links = re.findall(pattern, text)
         return found_links
 
-    def check_post_title(self):
-        """Checks if title follows the naming rules"""
-        title = self.title
-        print(f'\nChecking title \'{title}\'\n')
-        if 'RVC' in title:
-            if 'v2' not in title.lower():
-                print('✓ RVC')
-            else:
-                print('✓ RVC v2')
-        else:
-            print('✓ SVC')
-
-        if 'epoch' in title.lower():
-            print('✓ Epoch')
-        else:
-            print('❌ Missing epoch')
-        
-        # Optional info
-        if 'step' in title.lower():
-            print('✓ Steps')
-        if 'from ' in title.lower():
-            print('✓ Band/Group')
-        if ' of ' in title.lower():
-            print('❌ Band/Group name should be in parenthesis')
-
     def extract_model(self) -> VoiceModel:
         """Returns a `VoiceModel` object"""
         links = self.links
@@ -230,45 +226,10 @@ class VoiceModelParser:
 
         model = VoiceModel(
             title=self.name,
+            author=self.forum_parser.author,
             type=self.category,
             download_link=download_link,
             epochs=self.epochs,
             steps=self.steps
         )
         return model
-
-    def view_data(self):
-        """Shows the data that has been extracted"""
-        print('Title:', self.title)
-        print('Author:', self.forum_parser.author)
-        print('Tags:', self.tags)
-        print('Category:', self.category)
-        print('Epochs:', self.epochs)
-        print('Steps:', self.steps)
-        print('Date:', self.forum_parser.publish_date.strftime('%Y-%m-%d'))
-        print('Model:', self.name)
-        if not self.links:
-            print('Couldn\'t find any download link')
-        else:
-            print('Links:', self.links)
-        print('\nOriginal message:\n', self.forum_parser.message)
-        print()
-
-    def to_dict(self) -> dict:
-        result = {}
-        result['name'] = self.name
-        if self.epochs == -1:
-            result['info'] = 'No additional info'
-        else:
-            result['info'] = f'{NumberConverter.to_string(self.epochs)} Epochs'
-            # add steps if present
-            if self.steps != -1:
-                result['info'] += f' {NumberConverter.to_string(self.steps)} Steps'
-        result['release_date'] = self.release_date.strftime('%Y-%m-%d')
-        if self.links:
-            result['download_link'] = self.links[0]
-        else:
-            result['download_link'] = ''
-        result['category'] = self.category
-        result['author'] = self.author
-        return result

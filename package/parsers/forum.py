@@ -89,7 +89,7 @@ class DiscordForumParser:
         return result
     
     @property
-    def message(self) -> str:
+    def content(self) -> str:
         """The original message posted by the author, including links"""
         return self.chat_messages_contents.contents[2].text.strip()
     
@@ -105,18 +105,6 @@ class DiscordForumParser:
     def replies(self) -> List[PostMessage]:
         """List containing the post replies"""
         return list()
-    
-    @property
-    def post_content(self) -> PostContent:
-        content = PostContent(
-            title=self.title,
-            author=self.author,
-            content=self.message,
-            publish_date=self.publish_date,
-            tags=self.tags
-        )
-        content.replies = self.replies
-        return content
     
     @property
     def links(self) -> List[str]:

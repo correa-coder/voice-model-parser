@@ -10,6 +10,7 @@ pip-delete-this-directory.txt
 pages/
 dumps/
 dummy/
+adhoc.py
 tests2.py
 data.json
 *.log
