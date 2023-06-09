@@ -139,7 +139,7 @@ class DiscordForumParser:
         if not basedir.exists():
             basedir.mkdir()
         fp = basedir / filename
-        with open(fp, mode='a', encoding='utf8') as f:
+        with open(fp, mode='w', encoding='utf8') as f:
             f.write(self.text)
     
     def get_post_message(self) -> PostMessage:
