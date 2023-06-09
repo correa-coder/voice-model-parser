@@ -12,17 +12,29 @@ class VoiceModel:
             title:str,
             author:str,
             tags: List[str],
-            type:str='RVC',
             download_link:str='',
             epochs:int=-1, steps:int=-1):
         self.title = title
         self.author = author
         self.tags = tags
-        self.type = type
         self.download_link = download_link
         self.epochs = epochs
         self.steps = steps
+        self.__type = 'RVC'  # Defaults to RVC
         self.__group = 'No Group'
+
+    @property
+    def type(self) -> List[str]:
+        """Extract the model type from the tags"""
+        result = 'RVC'
+        for tag in self.tags:
+            if 'RVC V2' in tag:
+              result += ' v2'
+        return result
+
+    @type.setter
+    def type(self, model_type:str):
+        self.__type = model_type  # RVC or RVC v2, SVC currently not supported
 
     @property
     def has_group(self) -> bool:
@@ -235,7 +247,6 @@ class VoiceModelParser:
         model = VoiceModel(
             title=self.name,
             author=self.forum_parser.author,
-            type=self.category,
             tags=self.tags,
             download_link=download_link,
             epochs=self.epochs,
