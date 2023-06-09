@@ -123,7 +123,18 @@ def save_text(text:str, dest:pathlib.Path, filename:str):
 def get_html_files(directory:pathlib.Path) -> List[pathlib.Path]:
     return [f for f in directory.iterdir() if (f.is_file() and f.suffix == '.html')]
 
-# TODO: create archive function to move files to archived folder
+
+def move_to_archive(fp:pathlib.Path) -> bool:
+    success:bool = False
+    archived_dir = pathlib.Path(__file__).parent.parent.parent / 'pages' / 'archived'
+    try:
+        shutil.move(str(fp), str(archived_dir))
+        success = True
+    except Exception as e:
+        print(f'\nThe following exception happened while trying to move {fp.name}')
+        print(e)
+        print(e.__class__)
+    return success
 
 
 def save_json(fp:pathlib.Path, data:dict) -> bool:

@@ -8,10 +8,12 @@ import shutil
 from pathlib import Path
 from typing import List
 
-
 from package.parsers.forum import DiscordForumParser
 from package.parsers.voice_model import VoiceModel, VoiceModelParser
-from package.utils.helpers import get_html_files, load_html, load_json, save_text
+
+from package.utils.helpers import (
+    get_html_files, load_html, load_json, save_json, move_to_archive
+)
 
 BASE_DIR = Path(__file__).parent
 HTML_DIR = BASE_DIR / 'pages'  # look for .html files in this directory
@@ -26,6 +28,12 @@ logger.addHandler(file_handler)
 
 
 def main():
+    # create a folder to archive analyzed files
+    archived_dir = Path(BASE_DIR / 'pages' / 'archived')
+    if not archived_dir.exists():
+        archived_dir.mkdir()
+
+    # get the files to analyze
     html_files = get_html_files(HTML_DIR)
     total_files_analyzed = len(html_files)
 
@@ -58,36 +66,35 @@ def main():
                 print(f'Multiple links found for {model_parser.title}, manually analyze it by looking the dumps folder')
                 forum_parser.save_extracted_text()
             else:
-                # if there's only one link allow saving the data to json
+                # if there's only one link, allow saving the data to json
                 voice_model = model_parser.extract_model()
-                # TODO: fix release date
                 new_data['voice_models'].append(voice_model.to_dict())
 
                 # move to archived folder if everything went well
-                try:
-                    # TODO: create archive folder if doesn't exist
-                    #shutil.move(str(fp), str(BASE_DIR / 'pages' / 'archived'))
-                    logger.info(f'Moved {fp.name} to archive')
-                    logger.info(f'OK - {model_parser.title}')
-                except Exception as e:
-                    logger.error(f'Failed to move {fp.name} to archive')
-                    logger.exception(e)
+                moved_successfully:bool = move_to_archive(fp)
+                if moved_successfully:
+                    print(f'OK - Moved {fp.name} to archived folder')
+                else:
+                    print(f'Failed to move {fp.name} to archived folder')
         except Exception as e:
+            print.error(f'FAIL - {model_parser.title}')
             logger.error(f'FAIL - {model_parser.title}')
             logger.exception(e)
 
         print('-' * 128)
         print()
 
-    #with open(BASE_DIR / 'data.json', 'w', encoding='utf8') as json_f:
-        # merge the new data with previous one
-        #previous_data['voice_models'] +=  new_data['voice_models']
-        #json.dump(previous_data, json_f, indent=4)
+    # save the data to json
+    previous_data['voice_models'] +=  new_data['voice_models']
+    data_to_save = previous_data  # now it has the new data merged
+    json_saved = save_json(BASE_DIR / 'data.json', data_to_save)
 
-    message = f'{total_files} file(s) analyzed. See "{log_file_path.name}" for more details.\n\n'
+    if json_saved:
+        print(f'Saved extracted data to data.json')
+
+    message = f'{total_files_analyzed} file(s) analyzed. See "{log_file_path.name}" for more details.\n\n'
     print(message)
 
 
 if __name__ == '__main__':
-    #main()
-    ...
+    main()
