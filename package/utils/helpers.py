@@ -127,4 +127,30 @@ def get_html_files(directory:pathlib.Path) -> List[pathlib.Path]:
 
 # TODO: create archive function to move files to archived folder
 
-# TODO: create helper function to load and save json
+
+def save_json(fp:pathlib.Path, data:dict) -> bool:
+    """Note: This function overwrites previous saved data"""
+    success:bool = False
+    try:
+        with open(fp, 'w', encoding='utf8') as json_f:
+            json.dump(data, json_f, indent=4)
+        success = True
+    except Exception as e:
+        print(f'Failed to save {fp.name} in {fp.parent}')
+    return success
+
+
+def load_json(fp:pathlib.Path) -> dict:
+    data = {}
+    # create the file if it doesn't exist
+    if not fp.exists():
+        save_json(fp, data)
+
+    try:
+        with open(fp, 'r', encoding='utf8') as f:
+            data = json.load(f)
+    except Exception as e:
+        print(e.__class__)
+        print(f'Failed to load {fp.name} from {fp.parent}')
+    return data
+        
