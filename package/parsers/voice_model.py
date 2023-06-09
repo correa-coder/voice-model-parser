@@ -47,7 +47,7 @@ class VoiceModel:
             _name = _name.replace('From', '')
             _name = _name.replace('from', '')
             return _name.strip().title()
-        return result
+        return result.title()
 
     def __str__(self) -> str:
         result = f'{self.name}'
