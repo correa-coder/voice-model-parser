@@ -1,3 +1,7 @@
+import pathlib
+from bs4 import BeautifulSoup
+
+
 class NumberConverter:
 
     @staticmethod
@@ -17,3 +21,9 @@ class NumberConverter:
             number = text.replace('k', '')
             return int(float(number) * 1000)
         return int(text)
+    
+
+def load_html(src:pathlib.Path) -> BeautifulSoup:
+    with open(src, mode='r', encoding='utf8') as html_file:
+        html_data = BeautifulSoup(html_file, 'html.parser')
+    return html_data

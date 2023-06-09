@@ -9,5 +9,7 @@ pip-delete-this-directory.txt
 # Other:
 pages/
 dumps/
+dummy/
+tests2.py
 data.json
 *.log

@@ -2,7 +2,7 @@ import unittest
 
 from package.parsers.forum import DiscordForumParser
 from package.parsers.voice_model import VoiceModel, VoiceModelParser
-from package.utils.converters import NumberConverter
+from package.utils.helpers import NumberConverter
 
 
 class ParserTests(unittest.TestCase):

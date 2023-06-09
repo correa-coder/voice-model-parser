@@ -2,7 +2,7 @@ import re
 from typing import List
 
 from .forum import DiscordForumParser
-from ..utils.converters import NumberConverter
+from ..utils.helpers import NumberConverter
 
 
 class VoiceModel:
