@@ -35,8 +35,9 @@ def main():
 
     # fp = File path
     for fp in html_files[:3]:
-        logger.info(f'Analyzing {fp.name}...')
+        print(f'Analyzing {fp.name}...')
         time.sleep(0.05)
+
         html_data = load_html(fp)
 
         try:
@@ -45,10 +46,11 @@ def main():
 
             # don't add to json if there's no link
             if not model_parser.links:
-                print(f'No links found for {model_parser.title}, skipping...')
+                print(f'No links founds for {model_parser.title} manually analyze it by looking {dump_filename}')
+
                 date_format = "%Y-%m-%d"
                 dump_filename = f'{datetime.datetime.now().strftime(date_format)} - {forum_parser.title}.txt'
-                logger.warning(f'No links founds, manually analize it by looking {dump_filename}')
+                logger.warning()
                 save_text(model_parser.text, BASE_DIR / 'dumps', dump_filename)
                 continue
 

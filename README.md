@@ -43,7 +43,7 @@ If everything goes well, the extracted data will be saved in a file called `data
 ### DiscordForumParser
 
 This class is responsible for extracting general info from the forum post. It expects a `BeautifulSoup` object to be passed to it's constructor.
- 
+
 ```python
 from package.parsers.forum import DiscordForumParser
 from package.utils.helpers import load_html
@@ -111,6 +111,10 @@ print('Type:', voice_model.type)
 print('Epochs:', voice_model.epochs)
 print('Steps:', voice_model.steps)
 print('Download link:', voice_model.download_link)
+print()
+
+# to string method
+print(str(voice_model))
 ```
 
 Output:
@@ -125,6 +129,8 @@ Type: RVC
 Epochs: 100
 Steps: -1  # returns -1 if not found or not provided
 Download link: https://drive.google.com/file/d/1gjes-x7MT4k4O2BJdO9WeDhoJar3q_RB/view?usp=sharing
+
+Alvin Seville (From Alvin and The Chipmunks) (RVC) 100 Epochs
 ```
 
 ---
