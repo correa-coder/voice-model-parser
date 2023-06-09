@@ -168,7 +168,7 @@ class VoiceModelParser:
 
     @property
     def links(self) -> List[str]:
-        """Download links links found in the post (except from post replies)"""
+        """Download links links found in the post"""
         all_links = self.forum_parser.links
         # Filter download links
         valid_download_providers = ['drive.google.com', 'mega.nz', 'mediafire', 'pixeldrain', 'krakenfiles']
@@ -177,13 +177,17 @@ class VoiceModelParser:
             for valid_provider in valid_download_providers:
                 if valid_provider in link:
                     links_filtered.append(link)
+        # if links not found in the post, look for it in the comments
+        links_filtered = self.extract_links(self.forum_parser.text)
         return links_filtered
     
     @staticmethod
     def extract_links(text:str) -> List[str]:
         """Attempt to extract links from a string (currently only google drive and mega)"""
         if 'drive.google.com/' in text:
-            pattern = r'https://drive.google.com/file/d/.{33}/view\?usp=sharing'
+            pattern = r'https://drive.google.com/file/d/.{33}/view\?usp=(sharing|drive_link)'
+            matches = re.finditer(pattern, text)
+            return [m.group(0) for m in matches]
         elif 'mega.nz/' in text:
             pattern= r'https://mega.nz/file/.{52}'
         else:
