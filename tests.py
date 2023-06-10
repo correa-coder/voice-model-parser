@@ -112,5 +112,6 @@ class TestVoiceModel(unittest.TestCase):
         self.assertEqual(str(self.voice2), 'Jennie (From BLACKPINK) (RVC v2) 400 Epochs 44.1k Steps')
         self.assertEqual(str(self.voice3), 'Rosé (RVC v2) 1.2k Epochs 44.1k Steps')
 
+
 if __name__ == '__main__':
     unittest.main()

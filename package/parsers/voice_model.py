@@ -73,21 +73,15 @@ class VoiceModel:
     
     def to_dict(self) -> dict:
         result = {}
-        result['name'] = self.name
-        if self.epochs == -1:
-            result['info'] = 'No additional info'
-        else:
-            result['info'] = f'{NumberConverter.to_string(self.epochs)} Epochs'
-            # add steps if present
-            if self.steps != -1:
-                result['info'] += f' {NumberConverter.to_string(self.steps)} Steps'
-        result['release_date'] = self.release_date.strftime('%Y-%m-%d')
-        if self.links:
-            result['download_link'] = self.links[0]
-        else:
-            result['download_link'] = ''
-        result['category'] = self.category
+        result['title'] = self.title
         result['author'] = self.author
+        result['tags'] = self.tags
+        result['download_link'] = self.download_link
+        result['release_date'] = self.release_date
+        result['epochs'] = self.epochs
+        result['steps'] = self.steps
+        result['type'] = self.type
+        result['group'] = self.group
         return result
 
     def __str__(self) -> str:

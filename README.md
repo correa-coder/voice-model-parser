@@ -135,6 +135,30 @@ Download link: https://drive.google.com/file/d/1gjes-x7MT4k4O2BJdO9WeDhoJar3q_RB
 Alvin Seville (From Alvin and The Chipmunks) (RVC) 100 Epochs
 ```
 
+The `VoiceModel` object has a `to_dict()` method that allows you to serialize it to a python dictionary.
+
+```python
+model_parser = VoiceModelParser(forum_parser)
+voice_model = model_parser.extract_model()
+print(voice_model.to_dict())
+```
+
+Output:
+
+```yaml
+{
+    'author': 'yeey5',
+    'download_link': 'https://drive.google.com/file/d/1gjes-x7MT4k4O2BJdO9WeDhoJar3q_RB/view?usp=sharing',
+    'epochs': 100,
+    'group': 'Alvin and The Chipmunks',
+    'release_date': '2023-06-03',
+    'steps': -1,
+    'tags': ['RVC', 'Fictional Character'],
+    'title': 'Alvin Seville (From Alvin and The Chipmunks)',
+    'type': 'RVC'
+}
+```
+
 ---
 
 ## **Limitations**
