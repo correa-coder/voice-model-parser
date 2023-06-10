@@ -97,4 +97,13 @@ def main():
 
 
 if __name__ == '__main__':
-    main()
+    pages_dir = BASE_DIR / 'pages'
+    if not pages_dir.exists():
+        print(f'1. Create a folder named "pages" at {str(BASE_DIR)}')
+        print('2. Place the html files that you want to analyze there and then run this script')
+    else:
+        total_html_files = get_html_files(pages_dir)
+        if len(total_html_files) == 0:
+            print(f'No file to analyze at {pages_dir.parent}')
+        else:
+            main()
