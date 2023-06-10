@@ -3,13 +3,10 @@ __version__ = '1.0'
 import logging
 import datetime
 import time
-import json
-import shutil
 from pathlib import Path
-from typing import List
 
 from package.parsers.forum import DiscordForumParser
-from package.parsers.voice_model import VoiceModel, VoiceModelParser
+from package.parsers.voice_model import VoiceModelParser
 
 from package.utils.helpers import (
     get_html_files, load_html, load_json, save_json, move_to_archive
@@ -44,7 +41,7 @@ def main():
 
     # fp = File path
     for fp in html_files[:3]:
-        print(f'Analyzing {fp.name}...')
+        print(f'\nAnalyzing {fp.name}...')
         time.sleep(0.05)
 
         html_data = load_html(fp)
@@ -91,8 +88,10 @@ def main():
 
     if json_saved:
         print(f'Saved extracted data to data.json')
+    else:
+        print('Failed to save data to data.json')
 
-    message = f'{total_files_analyzed} file(s) analyzed. See "{log_file_path.name}" for more details.\n\n'
+    message = f'\n{total_files_analyzed} file(s) analyzed. See "{log_file_path.name}" for more details.\n\n'
     print(message)
 
 

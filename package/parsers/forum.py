@@ -4,45 +4,6 @@ from typing import List
 from bs4 import BeautifulSoup
 
 
-class PostMessage:
-
-    def __init__(
-            self, author:str, content:str,
-            publish_date:datetime.datetime, title:str='', reaction_count:int=0):
-        self.title = title
-        self.author = author
-        self.content = content
-        self.publish_date = publish_date
-        self.reaction_count = reaction_count
-
-    def __str__(self) -> str:
-        result = '\n'
-        result += f'Title: {self.title}\n'
-        result += f'Author: {self.author}\n'
-        result += f'Publish date: {self.publish_date.strftime("%Y-%m-%d")}\n'
-        result += f'Content:\n{self.content}\n'
-        result += '-' * 128 + '\n'
-        return result
-
-
-class PostContent(PostMessage):
-    
-    def __init__(self, tags:List[str], **kwargs):
-        super().__init__(**kwargs)
-        self.tags = tags
-        self.replies:List[PostMessage] = []
-
-    def __str__(self) -> str:
-        result = '\n'
-        result += f'Title: {self.title}\n'
-        result += f'Author: {self.author}\n'
-        result += f'Tags: {self.tags}\n'
-        result += f'Publish date: {self.publish_date.strftime("%Y-%m-%d")}\n'
-        result += f'Content:\n{self.content}\n'
-        result += '-' * 128 + '\n'
-        return result
-
-
 class DiscordForumParser:
     """Extracts info from a discord forum thread"""
 
@@ -103,11 +64,6 @@ class DiscordForumParser:
         return count
     
     @property
-    def replies(self) -> List[PostMessage]:
-        """List containing the post replies"""
-        return list()
-    
-    @property
     def links(self) -> List[str]:
         """All links found in the post"""
         links = []
@@ -141,11 +97,3 @@ class DiscordForumParser:
         fp = basedir / filename
         with open(fp, mode='w', encoding='utf8') as f:
             f.write(self.text)
-    
-    def get_post_message(self) -> PostMessage:
-        return PostMessage(
-            title=self.title,
-            author=self.author,
-            content=self.message,
-            publish_date=self.publish_date
-        )
